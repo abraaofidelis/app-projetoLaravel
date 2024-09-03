@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Tarefa;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class TarefaController extends Controller
 {
@@ -12,9 +16,14 @@ class TarefaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index() : View
     {
         //
+        $produtos = Tarefa::latest()->paginate(5);
+
+        return view('tarefas.index',compact('tarefas'))
+
+            ->with('i',(request()->input('page',1)-1)*5);
     }
 
     /**
@@ -22,9 +31,10 @@ class TarefaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create() : View
     {
         //
+        return view('tarefas.create');
     }
 
     /**
@@ -33,9 +43,15 @@ class TarefaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         //
+        $request->validate([
+            'descricao' => 'required',
+        ]);
+        Tarefa::create($request->all());
+        return redirect()->route('tarefas.index')
+                        ->with('success','Tarefa criada com sucesso.');
     }
 
     /**
@@ -44,9 +60,10 @@ class TarefaController extends Controller
      * @param  \App\Models\Tarefa  $tarefa
      * @return \Illuminate\Http\Response
      */
-    public function show(Tarefa $tarefa)
+    public function show(Tarefa $tarefa): View
     {
         //
+        return view('tarefas.show',compact('tarefa'));
     }
 
     /**
@@ -55,9 +72,10 @@ class TarefaController extends Controller
      * @param  \App\Models\Tarefa  $tarefa
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tarefa $tarefa)
+    public function edit(Tarefa $tarefa): View
     {
         //
+        return view('tarefas.edit',compact('tarefa'));
     }
 
     /**
@@ -67,9 +85,17 @@ class TarefaController extends Controller
      * @param  \App\Models\Tarefa  $tarefa
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tarefa $tarefa)
+    public function update(Request $request, Tarefa $tarefa): RedirectResponse
     {
         //
+        $request->validate([
+            'descricao' => 'required',
+        ]);
+
+        $tarefa->update($request->all());
+
+        return redirect()->route('tarefas.index')
+                        ->with('success','Tarefa atualizada com sucesso.');
     }
 
     /**
@@ -78,8 +104,11 @@ class TarefaController extends Controller
      * @param  \App\Models\Tarefa  $tarefa
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Tarefa $tarefa)
+    public function destroy(Tarefa $tarefa): RedirectResponse
     {
         //
+        $tarefa->delete();
+        return redirect()->route('tarefas.index')
+                        ->with('success','Tarefa excluída com sucesso.');
     }
 }
