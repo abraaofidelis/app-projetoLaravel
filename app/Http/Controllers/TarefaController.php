@@ -19,7 +19,7 @@ class TarefaController extends Controller
     public function index() : View
     {
         //
-        $produtos = Tarefa::latest()->paginate(5);
+        $tarefas = Tarefa::latest()->paginate(5);
 
         return view('tarefas.index',compact('tarefas'))
 
@@ -60,11 +60,12 @@ class TarefaController extends Controller
      * @param  \App\Models\Tarefa  $tarefa
      * @return \Illuminate\Http\Response
      */
-    public function show(Tarefa $tarefa): View
+    public function show($id)
     {
-        //
-        return view('tarefas.show',compact('tarefa'));
+        $tarefa = Tarefa::findOrFail($id);
+        return view('tarefas.show', compact('tarefa'));
     }
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -72,11 +73,11 @@ class TarefaController extends Controller
      * @param  \App\Models\Tarefa  $tarefa
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tarefa $tarefa): View
-    {
-        //
-        return view('tarefas.edit',compact('tarefa'));
+    public function edit($id) {
+        $tarefa = Tarefa::findOrFail($id); // Certifique-se de que a tarefa é encontrada pelo ID
+        return view('tarefas.edit', compact('tarefa')); // Passa a tarefa para a view
     }
+    
 
     /**
      * Update the specified resource in storage.
@@ -92,7 +93,7 @@ class TarefaController extends Controller
             'descricao' => 'required',
         ]);
 
-        $tarefa->update($request->all());
+        $tarefa->update($request->only(['descricao']));
 
         return redirect()->route('tarefas.index')
                         ->with('success','Tarefa atualizada com sucesso.');
